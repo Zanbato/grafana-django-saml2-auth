@@ -308,7 +308,13 @@ def signin(request: HttpRequest) -> HttpResponseRedirect:
     request.session["login_next_url"] = next_url
 
     saml_client = get_saml_client(get_assertion_url(request), acs)
-    _, info = saml_client.prepare_for_authenticate(relay_state=next_url)  # type: ignore
+    # _, info = saml_client.prepare_for_authenticate(relay_state=next_url)  # type: ignore
+    idps = saml_client.config.metadata.identity_providers()
+
+    # Allow the requester to select the IDP they want to use. Required if multiple IDPs are configured.
+    selected_idp = r.GET.get('idp', idps[0] if len(idps) else None)
+
+    _, info = saml_client.prepare_for_authenticate(entityid=selected_idp, relay_state=next_url)
 
     redirect_url = dict(info["headers"]).get("Location", "")
     return HttpResponseRedirect(redirect_url)
