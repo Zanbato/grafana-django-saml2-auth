@@ -312,7 +312,7 @@ def signin(request: HttpRequest) -> HttpResponseRedirect:
     idps = saml_client.config.metadata.identity_providers()
 
     # Allow the requester to select the IDP they want to use. Required if multiple IDPs are configured.
-    selected_idp = r.GET.get('idp', idps[0] if len(idps) else None)
+    selected_idp = request.GET.get('idp', idps[0] if len(idps) else None)
 
     _, info = saml_client.prepare_for_authenticate(entityid=selected_idp, relay_state=next_url)
 
